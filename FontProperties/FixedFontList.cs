@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,6 +38,19 @@ namespace UnicodeConsole
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        internal string[] ToRegArray()
+        {
+            var count = _linkedFonts.Count;
+            var regArray = new string[count];
+
+            for (var i = 0; i < count; i++)
+            {
+                regArray[i] = _linkedFonts[i].ToString();
+            }
+
+            return regArray;
         }
     }
 }

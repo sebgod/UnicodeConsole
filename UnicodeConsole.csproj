@@ -42,6 +42,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -51,7 +52,10 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FixedFont.cs" />
+    <Compile Include="FontProperties\FixedFont.cs" />
+    <Compile Include="FontProperties\FixedFontList.cs" />
+    <Compile Include="FontProperties\FontProperties.cs" />
+    <Compile Include="WinAPI\UnsafeNativeFunctions.cs" />
     <Compile Include="UnicodeConsole.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
