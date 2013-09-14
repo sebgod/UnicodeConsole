@@ -57,6 +57,7 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="app.config" />
+    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FontProperties\FixedFont.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Infrastructure\Shell\ConsoleHotkey.cs" />
     <Compile Include="Infrastructure\Shell\ConsoleShell.cs" />
     <Compile Include="Infrastructure\TextHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WinAPI\UnsafeNativeFunctions.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
