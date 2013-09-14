@@ -33,14 +33,14 @@ namespace UnicodeConsole
         public FixedFont(string fontDesc)
         {
             var split = fontDesc.Split(',');
-            FontFile = split[0];
-            Name = split[1];
+            FontFile  = split[0];
+            Name      = split[1];
         }
 
         public FixedFont(string fontFile, string name)
         {
-            FontFile = fontFile;
-            Name = name;
+            FontFile  = fontFile;
+            Name      = name;
         }
 
         public override string ToString()

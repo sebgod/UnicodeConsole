@@ -8,18 +8,19 @@ using UnicodeConsole.FontProperties;
 
 namespace UnicodeConsole.Infrastructure
 {
-    class Installer
+    class Installer : IDisposable
     {
         const string WindowsNT = @"Software\Microsoft\Windows NT\CurrentVersion";
         const string FontLinkPath = WindowsNT + @"\FontLink\SystemLink";
 
         public void Execute()
         {
-            LinkFonts();    
+            Task.WaitAll(LinkFontsAsync());
         }
 
-        private void LinkFonts()
+        private async Task LinkFontsAsync()
         {
+            Exception executingException = null;
             try
             {
                 using (var fontLinkKey = Registry.LocalMachine.OpenSubKey(FontLinkPath, true))
@@ -38,11 +39,21 @@ namespace UnicodeConsole.Infrastructure
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine(exception.Message);
-                Console.Error.WriteLine("Testing:");
-                Console.Error.WriteLine(" - Korean:  안녕하세요");
-                Console.Error.WriteLine(" - Chinese: 你好！");
+                executingException = exception;
             }
+
+            if (executingException != null)
+            {
+                await Console.Error.WriteLineAsync(executingException.Message);
+                await Console.Error.WriteLineAsync("Testing:");
+                await Console.Error.WriteLineAsync(" - Korean:  안녕하세요");
+                await Console.Error.WriteLineAsync(" - Chinese: 你好！");
+            }
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

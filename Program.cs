@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System;
 using UnicodeConsole.Infrastructure;
+using UnicodeConsole.Infrastructure.Shell;
 
 namespace UnicodeConsole
 {
@@ -9,9 +10,11 @@ namespace UnicodeConsole
         [STAThread]
         public static void Main(string[] args)
         {
-            var unicodeEncoding = new UnicodeEncoding(!BitConverter.IsLittleEndian, false);
-            Console.InputEncoding = unicodeEncoding;
+            var unicodeEncoding    = new UnicodeEncoding(!BitConverter.IsLittleEndian, false);
+            Console.InputEncoding  = unicodeEncoding;
             Console.OutputEncoding = unicodeEncoding;
+            // preventing a deadlock http://blogs.microsoft.co.il/blogs/dorony/archive/2012/09/12/console-readkey-net-4-5-changes-may-deadlock-your-system.aspx
+            Console.Error.Flush(); 
 
             Options options;
             if (args.Length > 0)
@@ -38,17 +41,17 @@ namespace UnicodeConsole
             switch (options.StartupCommand)
             {
                 case Options.Command.Install:
-                    new Installer().Execute();
+                    using (var installer = new Installer())
+                    {
+                        installer.Execute();
+                    }
                     break;
             }
 
             if (options.StartCLI)
             {
-                ConsoleKeyInfo key;
-                while ((key = Console.ReadKey(true)).Key != ConsoleKey.Escape)
-                {
-                    Console.Write(key.KeyChar);
-                }
+                var shell = new ConsoleShell();
+                shell.ReadConsole().Wait(-1);
             }
         }
     }
