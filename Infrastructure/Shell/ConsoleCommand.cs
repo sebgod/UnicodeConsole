@@ -32,7 +32,7 @@ namespace UnicodeConsole.Infrastructure.Shell
         {
             get { return Item4; }
         }
-
+        
         public string ToString(uint nameLength = 20, uint hotkeyLength = 15)
         {
             var nameAndHotkeyFormat = string.Format("{{0,-{0}}} {{1,-{1}}}", nameLength, hotkeyLength);

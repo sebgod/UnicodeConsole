@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Management.Automation;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,14 +9,16 @@ using System.Threading.Tasks;
 
 namespace UnicodeConsole.Infrastructure.Shell
 {
-    public class ConsoleShell
+    public class ConsoleShell : DisposableBase
     {
+        private readonly PowerShell _ps;
         private readonly ConsoleCommand[] _commandTable;
         private readonly ColorScheme _scheme;
         private readonly StringBuilder _lineBuffer;
 
         public ConsoleShell(ColorScheme scheme = ColorScheme.TerminalBlack)
         {
+            _ps = PowerShell.Create();
             _lineBuffer = new StringBuilder(Console.BufferWidth);
             _scheme = scheme;
             _commandTable = new[]
@@ -23,20 +26,25 @@ namespace UnicodeConsole.Infrastructure.Shell
                     new ConsoleCommand("exit", "Closes the console",
                                        async args =>
                                            {
+                                               await WriteMessageAsync("Bye bye!", MessageColor.Unimportant);
                                                return ConsoleDelegateResult.ExitShell;
                                            },
                                        ConsoleKey.Escape),
-                    new ConsoleCommand("help", "Zeigt diese Hilfe an", ShowUsage, ConsoleKey.F1),
+                    new ConsoleCommand("help", "Shows this help", ShowUsage, ConsoleKey.F1),
                     
-                    new ConsoleCommand("ver", "Zeigt die Version der ausführenden Assembly an",
+                    new ConsoleCommand("ver", "Shows version information",
                                        async args =>
                                            {
+                                               var psHost = (await AddCommandAsync("Get-Host")).First();
                                                var entryAssembly = Assembly.GetEntryAssembly();
-                                               var fileVersion = entryAssembly.GetCustomAttributes<AssemblyFileVersionAttribute>().SingleOrDefault();
-                                               await WriteMessageAsync("Version: " + (fileVersion != null ? fileVersion.Version : "<unknown>"), MessageColor.Informative);
+                                               var versionMessage = string.Format("{0} {1} by {2} PowerShell v{3}", 
+                                                   entryAssembly.FullName, "Copyright© 2013", "Sebastian Godelet <sebastian.godelet@gmail.com>",
+                                                   psHost.Members["Version"].Value
+                                               );
+                                               await WriteMessageAsync(versionMessage, MessageColor.Text);
                                                return ConsoleDelegateResult.Ok;
                                            },
-                                       new ConsoleHotkey(ConsoleModifiers.Alt, ConsoleKey.V)
+                                       null
                         ),
 
                 };
@@ -55,7 +63,7 @@ namespace UnicodeConsole.Infrastructure.Shell
         public async Task WritePromptAsync()
         {
             Console.BackgroundColor = MessageColor.Background.ToConsoleColor(_scheme);
-            Console.ForegroundColor = MessageColor.Informative.ToConsoleColor(_scheme);
+            Console.ForegroundColor = MessageColor.Text.ToConsoleColor(_scheme);
             if (Console.CursorLeft == 0)
             {
                 await Console.Out.WriteAsync('>');
@@ -81,12 +89,16 @@ namespace UnicodeConsole.Infrastructure.Shell
                 if (isAltOrCntrl)
                 {
                     // TODO: handle special commands
-                    if (cntrl)
+                    if (cntrl && !alt)
                     {
                         switch (consoleKey)
                         {
                             case ConsoleKey.LeftArrow:
                                 Console.CursorLeft = 1;
+                                break;
+
+                            default:
+                                await WriteMessageAsync(string.Format("Pressed Cntrl-{0}", consoleKey), MessageColor.Text);
                                 break;
                         }
                     }
@@ -101,10 +113,8 @@ namespace UnicodeConsole.Infrastructure.Shell
                                 _lineBuffer.Clear();
                                 Console.WriteLine();
 
-                                var commandName = new Regex(@"^(\w+)\b").Match(input).Groups[1].Value.Trim();
+                                var commandName = new Regex(@"^([^(\s]+)\b", RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant).Match(input).Groups[1].Value.Trim();
                                 var args = input.Substring(commandName.Length).Trim();
-
-                                Console.ForegroundColor = ConsoleColor.White;
 
                                 Console.ResetColor();
 
@@ -121,7 +131,11 @@ namespace UnicodeConsole.Infrastructure.Shell
                                 {
                                     if (commandName.Length > 0)
                                     {
-                                        await WriteMessageAsync("cannot find an action for: " + commandName, MessageColor.Error);
+                                        var commandResults = await AddCommandAsync(commandName);
+                                        foreach (var result in commandResults)
+                                        {
+                                            await WriteMessageAsync("Result: " + result, MessageColor.StateChangeSuccess);
+                                        }
                                     }
                                 }
                                 else
@@ -158,11 +172,17 @@ namespace UnicodeConsole.Infrastructure.Shell
             } while (!commandResult.HasFlag(ConsoleDelegateResult.ExitFlag));
         }
 
+        private async Task<PSDataCollection<PSObject>> AddCommandAsync(string commandName)
+        {
+            _ps.AddCommand(commandName);
+            return await Task.Factory.FromAsync(_ps.BeginInvoke(), pResult => _ps.EndInvoke(pResult));
+        }
+
         public async Task<ConsoleDelegateResult> ShowUsage(string args = null)
         {
             foreach (var command in _commandTable)
             {
-                await WriteMessageAsync(command.ToString(), MessageColor.Informative);
+                await WriteMessageAsync(command.ToString(), MessageColor.Text);
             }
 
             return ConsoleDelegateResult.Ok;
@@ -178,6 +198,16 @@ namespace UnicodeConsole.Infrastructure.Shell
             await outputStream.WriteLineAsync(message);
             await WritePromptAsync();
             await outputStream.WriteAsync(_lineBuffer.ToString());
+        }
+
+        protected override void DisposeUnmanagedMembers()
+        {
+
+        }
+
+        protected override void DisposeManagedMembers()
+        {
+            _ps.Dispose();
         }
     }
 }

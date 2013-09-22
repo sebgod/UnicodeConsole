@@ -8,14 +8,14 @@ using UnicodeConsole.FontProperties;
 
 namespace UnicodeConsole.Infrastructure
 {
-    class Installer : IDisposable
+    class Installer : DisposableBase
     {
         const string WindowsNT = @"Software\Microsoft\Windows NT\CurrentVersion";
         const string FontLinkPath = WindowsNT + @"\FontLink\SystemLink";
 
-        public void Execute()
+        public async Task Execute()
         {
-            Task.WaitAll(LinkFontsAsync());
+            await LinkFontsAsync();
         }
 
         private async Task LinkFontsAsync()
@@ -51,7 +51,12 @@ namespace UnicodeConsole.Infrastructure
             }
         }
 
-        public void Dispose()
+        protected override void DisposeUnmanagedMembers()
+        {
+            
+        }
+
+        protected override void DisposeManagedMembers()
         {
             
         }

@@ -18,9 +18,9 @@ namespace UnicodeConsole.Infrastructure.Shell
         Error,
         StateChangeSuccess,
         RecoverableFailure,
-        Informative,
+        Text,
         Impure,
-        Queuing
+        StateLog
     }
 
     public static class MessageColorEx
@@ -33,7 +33,7 @@ namespace UnicodeConsole.Infrastructure.Shell
                 case ColorScheme.TerminalBlack:
                     switch (@this)
                     {
-                        case MessageColor.Queuing:
+                        case MessageColor.StateLog:
                             return ConsoleColor.Cyan;
                         case MessageColor.Background:
                             return ConsoleColor.Black;
@@ -41,7 +41,7 @@ namespace UnicodeConsole.Infrastructure.Shell
                             return ConsoleColor.Red;
                         case MessageColor.RecoverableFailure:
                             return ConsoleColor.DarkRed;
-                        case MessageColor.Informative:
+                        case MessageColor.Text:
                             return ConsoleColor.White;
                         case MessageColor.StateChangeSuccess:
                             return ConsoleColor.Green;

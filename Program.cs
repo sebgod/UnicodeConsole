@@ -2,6 +2,7 @@
 using System;
 using UnicodeConsole.Infrastructure;
 using UnicodeConsole.Infrastructure.Shell;
+using System.Threading.Tasks;
 
 namespace UnicodeConsole
 {
@@ -14,6 +15,7 @@ namespace UnicodeConsole
             Console.InputEncoding  = unicodeEncoding;
             Console.OutputEncoding = unicodeEncoding;
             // preventing a deadlock http://blogs.microsoft.co.il/blogs/dorony/archive/2012/09/12/console-readkey-net-4-5-changes-may-deadlock-your-system.aspx
+            Console.Out.Flush();
             Console.Error.Flush(); 
 
             Options options;
@@ -43,7 +45,7 @@ namespace UnicodeConsole
                 case Options.Command.Install:
                     using (var installer = new Installer())
                     {
-                        installer.Execute();
+                        Task.WaitAll(installer.Execute());
                     }
                     break;
             }
@@ -51,7 +53,7 @@ namespace UnicodeConsole
             if (options.StartCLI)
             {
                 var shell = new ConsoleShell();
-                shell.ReadConsole().Wait(-1);
+                Task.WaitAll(shell.ReadConsole());
             }
         }
     }
