@@ -18,6 +18,7 @@ namespace UnicodeConsole.Infrastructure.Shell
         Error,
         StateChangeSuccess,
         RecoverableFailure,
+        Input,
         Text,
         Impure,
         StateLog
@@ -49,6 +50,8 @@ namespace UnicodeConsole.Infrastructure.Shell
                             return ConsoleColor.DarkGray;
                         case MessageColor.Impure:
                             return ConsoleColor.Magenta;
+                        case MessageColor.Input:
+                            return ConsoleColor.White;
 
                         default:
                             throw new ArgumentException("No mapping for: " + @this + " in the scheme: " + scheme, "this");
