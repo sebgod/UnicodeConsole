@@ -62,7 +62,6 @@
     <None Include=".gitignore" />
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FontProperties\FixedFont.cs" />
