@@ -85,6 +85,12 @@
   <ItemGroup>
     <Content Include="Icons\Deleket-Sleek-Xp-Software-Command-Prompt.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Win32ConEcho\Win32ConEcho.csproj">
+      <Project>{c1e19b36-a41c-4e1e-8477-aa3b2f72b04b}</Project>
+      <Name>Win32ConEcho</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />

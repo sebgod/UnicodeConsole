@@ -15,51 +15,6 @@ namespace Win32ConEcho
             Text = text;
         }
 
-        public void ExecuteConsoleCommand()
-        {
-            switch (Annotation)
-            {
-                case Annotation.Text:
-                    Console.Write(Text);
-                    break;
-
-                case Annotation.ColorEscape:
-                    var switches = string.IsNullOrEmpty(Text) ? new []{"0"} : Text.Split(';');
-                    var usesText = switches.Length >= 1 && char.IsLetter(switches[0], 0);
-                    if (usesText)
-                    {
-                        Console.ForegroundColor = ANSIColor.ParseANSIColor(switches[0]);
-                        if (switches.Length >= 2)
-                            Console.BackgroundColor = ANSIColor.ParseANSIColor(switches[1]);
-                    }
-                    else
-                    {
-                        var colorDirective = ANSIColor.ParseANSIColorDirective(switches[0]);
-                        var brightColors = colorDirective == 1;
-                        switch (switches.Length)
-                        {
-                            case 1:
-                                switch (colorDirective)
-                                {
-                                    case 0:
-                                        Console.ResetColor();
-                                        break;
-                                }
-                                break;
-
-                            case 2:
-                                Console.ForegroundColor = ANSIColor.ParseANSIColor(switches[1], 30, brightColors);
-                                break;
-
-                            case 3:
-                                Console.BackgroundColor = ANSIColor.ParseANSIColor(switches[2], 40, brightColors);
-                                goto case 2;
-                        }
-                    }
-                    break;
-            }
-        }
-
         public static IEnumerable<AnnotatedString> AnnotateText(string input)
         {
             var length = input.Length;
