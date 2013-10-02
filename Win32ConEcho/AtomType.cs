@@ -1,6 +1,6 @@
 ﻿namespace Win32ConEcho
 {
-    enum Annotation
+    public enum AtomType
     {
         Text = 0,
         ColorEscape = 'm'

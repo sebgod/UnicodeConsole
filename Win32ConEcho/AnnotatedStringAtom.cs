@@ -4,23 +4,25 @@ using System.Text;
 
 namespace Win32ConEcho
 {
-    internal struct AnnotatedString
+    public struct AnnotatedStringAtom
     {
-        public readonly Annotation Annotation;
+        public readonly AtomType AtomType;
         public readonly string Text;
 
-        public AnnotatedString(Annotation annotation, string text)
+        public AnnotatedStringAtom(AtomType annotation, string text)
         {
-            Annotation = annotation;
+            AtomType = annotation;
             Text = text;
         }
+    }
 
-        public static IEnumerable<AnnotatedString> AnnotateText(string input)
+    public static class AnnotatedStringAtomEx {
+        public static IEnumerable<AnnotatedStringAtom> Atomize(this string input)
         {
             var length = input.Length;
             var buffer = new StringBuilder(length);
             var cursor = 0;
-            const Annotation annotation = Annotation.Text;
+            const AtomType annotation = AtomType.Text;
             while (cursor < length)
             {
                 var c = input[cursor++];
@@ -48,17 +50,17 @@ namespace Win32ConEcho
                                 break;
 
                             case 'e':
-                                yield return new AnnotatedString(annotation, buffer.ToString());
+                                yield return new AnnotatedStringAtom(annotation, buffer.ToString());
                                 buffer.Clear();
 
-                                var seqEndIndex = input.IndexOfAny(new[] { (char)Annotation.ColorEscape, '_', ' ' }, cursor);
+                                var seqEndIndex = input.IndexOfAny(new[] { (char)AtomType.ColorEscape, '_', ' ' }, cursor);
 
-                                Annotation sequenceType;
+                                AtomType sequenceType;
                                 string escapeSequenceParams;
                                 var eatSequenceEndMarker = false;
                                 if (cursor == length)
                                 {
-                                    sequenceType = Annotation.ColorEscape;
+                                    sequenceType = AtomType.ColorEscape;
                                     escapeSequenceParams = string.Empty;
                                 }
                                 else if (seqEndIndex < cursor)
@@ -75,7 +77,7 @@ namespace Win32ConEcho
                                     escapeSequenceParams = input.Substring(cursor, seqEndIndex - cursor);
                                 }
 
-                                yield return new AnnotatedString(sequenceType, escapeSequenceParams);
+                                yield return new AnnotatedStringAtom(sequenceType, escapeSequenceParams);
                                 
                                 if (eatSequenceEndMarker)
                                     cursor = seqEndIndex + 1;
@@ -94,20 +96,22 @@ namespace Win32ConEcho
                 }
             }
 
-            yield return new AnnotatedString(annotation, buffer.ToString());
+            yield return new AnnotatedStringAtom(annotation, buffer.ToString());
         }
 
-        private static Annotation ParseANSIEscapeSequenceMarker(char seqEnd)
+        private static AtomType ParseANSIEscapeSequenceMarker(char seqEnd)
         {
             switch (seqEnd)
             {
                 case '_':
                 case ' ':
-                case (char)Annotation.ColorEscape: return Annotation.ColorEscape;
+                case (char)AtomType.ColorEscape: return AtomType.ColorEscape;
 
                 default:
                     throw new ArgumentException(seqEnd + " is an unrecognized ANSI escape sequence");
             }
         }
+
+        
     }
 }

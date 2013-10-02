@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Win32ConEcho
@@ -59,62 +60,40 @@ namespace Win32ConEcho
         private static async Task WriteSentenceAsync(string sentence, CommandSwitch commandSwitches)
         {
             if (commandSwitches.HasFlag(CommandSwitch.Tab))
-                Console.Write('\t');
+                await Console.Out.WriteAsync('\t');
 
             if (commandSwitches.HasFlag(CommandSwitch.ExtendedSyntax))
             {
-                foreach (var annotated in AnnotatedString.AnnotateText(sentence))
+                foreach (var colouredString in sentence.Atomize().ToColourizedStrings())
                 {
-                    switch (annotated.Annotation)
+                    if (colouredString.Background == colouredString.Foreground)
                     {
-                        case Annotation.Text:
-                            Console.Write(annotated.Text);
-                            break;
-
-                        case Annotation.ColorEscape:
-                            var switches = string.IsNullOrEmpty(annotated.Text) ? new[] { "0" } : annotated.Text.Split(';');
-                            var usesText = switches.Length >= 1 && char.IsLetter(switches[0], 0);
-                            if (usesText)
-                            {
-                                Console.ForegroundColor = ANSIColor.ParseANSIColor(switches[0]);
-                                if (switches.Length >= 2)
-                                    Console.BackgroundColor = ANSIColor.ParseANSIColor(switches[1]);
-                            }
-                            else
-                            {
-                                var colorDirective = ANSIColor.ParseANSIColorDirective(switches[0]);
-                                var brightColors = colorDirective == 1;
-                                switch (switches.Length)
-                                {
-                                    case 1:
-                                        switch (colorDirective)
-                                        {
-                                            case 0:
-                                                Console.ResetColor();
-                                                break;
-                                        }
-                                        break;
-
-                                    case 2:
-                                        Console.ForegroundColor = ANSIColor.ParseANSIColor(switches[1], 30, brightColors);
-                                        break;
-
-                                    case 3:
-                                        Console.BackgroundColor = ANSIColor.ParseANSIColor(switches[2], 40, brightColors);
-                                        goto case 2;
-                                }
-                            }
-                            break;
+                        if (colouredString.Foreground == ANSIColour.Reset)
+                        {
+                            Console.ResetColor();
+                        }
                     }
+                    else
+                    {
+                        if (colouredString.Foreground >= 0)
+                        {
+                            Console.ForegroundColor = (ConsoleColor)colouredString.Foreground;
+                        }
+                        if (colouredString.Background >= 0)
+                        {
+                            Console.BackgroundColor = (ConsoleColor)colouredString.Background;
+                        }
+                    }
+                    await Console.Out.WriteAsync(colouredString.Text);
                 }
             }
             else
             {
-                Console.Write(sentence);
+                await Console.Out.WriteAsync(sentence);
             }
 
             if (commandSwitches.HasFlag(CommandSwitch.NewLine))
-                Console.Out.WriteLine();
+                await Console.Out.WriteLineAsync();
         }
     }
 }
