@@ -5,7 +5,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnicodeConsole", "UnicodeCo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6486E74-5518-4E56-A7F0-3B6B652F13F0}"
 	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
 		Readme.md = Readme.md
+		test.cmd = test.cmd
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Win32ConEcho", "Win32ConEcho\Win32ConEcho.csproj", "{C1E19B36-A41C-4E1E-8477-AA3B2F72B04B}"
