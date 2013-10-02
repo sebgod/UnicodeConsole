@@ -5,6 +5,8 @@
 cscu /out:"%outdir%\xecho.exe" *.cs
 @pushd %outdir%
 ngen install xecho.exe
+:: pop %outdir%
 @popd
 
+:: pop %~dp0
 @popd
