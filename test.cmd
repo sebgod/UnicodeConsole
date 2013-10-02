@@ -1,7 +1,7 @@
-@pushd %~dp0
-
-@pushd Win32ConEcho
-@call test %*
-@popd
-
-@popd
+@for %%D in (Win32ConEcho) do (
+    @echo pushd %~dp0%%D
+    @pushd %%D
+    @call test %*
+    @echo popd %~dp0%%D
+    @popd
+)
