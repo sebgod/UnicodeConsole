@@ -1,7 +1,7 @@
 @pushd %~dp0
 
 @pushd Win32ConEcho
-@call test %*
+@call deployTo %*
 @popd
 
 @popd

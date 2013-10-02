@@ -1,8 +1,10 @@
-pushd %~dp0
-mkdir bin
-cscu /out:bin\xecho.exe *.cs
-pushd bin
-ngen install xecho.exe
-popd
+@pushd %~dp0
 
-popd
+@set outdir=bin\Release
+@if not exist "%outdir%" mkdir "%outdir%"
+cscu /out:"%outdir%\xecho.exe" *.cs
+@pushd %outdir%
+ngen install xecho.exe
+@popd
+
+@popd
