@@ -15,7 +15,7 @@
     xcopy /i /y %%F "%~1"
     @echo popping to deploy directory "%~1"
     @pushd "%~1"
-    ngen install %%F
+    call elevate ngen install %%F
     @echo popd deploy directory "%~1"
     @popd
 )
