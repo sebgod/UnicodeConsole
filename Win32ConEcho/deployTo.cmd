@@ -1,3 +1,9 @@
+@echo Deploying xecho.exe targets
+@if "%~1" == "" (
+    @echo You must specify the deploy directory >&2
+    @exit /b 1
+)
+
 @pushd %~dp0
 
 @set outdir=bin\Release

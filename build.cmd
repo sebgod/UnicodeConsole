@@ -1,7 +1,12 @@
-@for %%D in (Win32ConEcho) do (
-    @echo pushd %~dp0%%D
+@setlocal enabledelayedexpansion
+
+@echo Building projects in %~dp0
+@for %%D in (Win32ConEcho) do @(
+    @echo Push project %%D
     @pushd %%D
     @call build %*
-    @echo popd %~dp0%%D
+    @echo Leave project %%D
     @popd
 )
+
+@endlocal

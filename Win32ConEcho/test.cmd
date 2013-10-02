@@ -1,4 +1,9 @@
-@set xecho="%~dp0bin\xecho"
+@echo Testing deployed xecho
+@if "%~1" == "" (
+    @echo You must specify the deploy directory >&2
+    @exit /b 1
+)
+@set xecho="%~1\xecho"
 @%xecho% "Test without newline: "
 @%xecho% -x -n [\e1;32mOK\e0m]
 @%xecho% -x Test with embedded newline\n

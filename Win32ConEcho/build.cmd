@@ -1,9 +1,12 @@
-@echo pushd %~dp0
+@setlocal enabledelayedexpansion
 @pushd %~dp0
 
 @set outdir=bin\Release
 @if not exist "%outdir%" mkdir "%outdir%"
-cscu /out:"%outdir%\xecho.exe" *.cs
+@echo Building xecho.exe
+@echo using: cscu /out:"%outdir%\xecho.exe" *.cs
+@call cscu /out:"%outdir%\xecho.exe" *.cs
+@echo finished build of xecho.exe
 
-@echo popd %~dp0
 @popd
+@endlocal
