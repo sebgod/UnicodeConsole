@@ -25,6 +25,12 @@ namespace Win32ConEcho
         White = ConsoleColor.White // 15
     }
 
+    public enum ANSIColourDirective : byte
+    {
+        NoModifiers = 0,
+        BrightColours = 1,
+    }
+
     public static class ANSIColourEx
     {
         private static readonly ANSIColour[] ANSIBrightColors = new[]
@@ -102,13 +108,13 @@ namespace Win32ConEcho
             return array[colorValue - offset];
         }
 
-        public static int ParseANSIColourDirective(string colorDirective)
+        public static ANSIColourDirective ParseANSIColourDirective(string colorDirective)
         {
             int colorDirectiveValue;
             if (!int.TryParse(colorDirective, out colorDirectiveValue))
                 throw new ArgumentException(colorDirective + " is unknown!", "colorDirective");
 
-            return colorDirectiveValue;
+            return (ANSIColourDirective)colorDirectiveValue;
         }
     }
 }

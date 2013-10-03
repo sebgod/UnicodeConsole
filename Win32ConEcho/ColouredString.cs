@@ -50,13 +50,13 @@ namespace Win32ConEcho
                         else
                         {
                             var colorDirective = ANSIColourEx.ParseANSIColourDirective(switches[0]);
-                            var brightColors = colorDirective == 1;
+                            var brightColors = colorDirective == ANSIColourDirective.BrightColours;
                             switch (switches.Length)
                             {
                                 case 1:
                                     switch (colorDirective)
                                     {
-                                        case 0:
+                                        case ANSIColourDirective.NoModifiers:
                                             foreground = ANSIColour.Reset;
                                             background = ANSIColour.Reset;
                                             break;

@@ -6,6 +6,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6486E74-5518-4E56-A7F0-3B6B652F13F0}"
 	ProjectSection(SolutionItems) = preProject
 		build.cmd = build.cmd
+		deployTo.cmd = deployTo.cmd
 		Readme.md = Readme.md
 		test.cmd = test.cmd
 	EndProjectSection
