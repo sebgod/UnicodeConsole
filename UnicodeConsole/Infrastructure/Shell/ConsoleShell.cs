@@ -20,7 +20,7 @@ namespace UnicodeConsole.Infrastructure.Shell
         private readonly ColourScheme _scheme;
         private readonly LineBuffer _lineBuffer;
 
-        public ConsoleShell(ColourScheme scheme = ColourScheme.TerminalBlack)
+        public ConsoleShell(ColourScheme scheme = ColourScheme.WhiteOnBlack)
         {
             _ps = PowerShell.Create();
             _scheme = scheme;
@@ -30,7 +30,7 @@ namespace UnicodeConsole.Infrastructure.Shell
                     new ConsoleCommand("exit", "Closes the console",
                                        async args =>
                                            {
-                                               await WriteMessageAsync("Bye bye!", MessageColour.Unimportant);
+                                               await WriteMessageAsync("Closing this terminal!", MessageColour.Warning);
                                                return ConsoleDelegateResult.ExitShell;
                                            },
                                        ConsoleKey.Escape),
@@ -66,7 +66,7 @@ namespace UnicodeConsole.Infrastructure.Shell
 
         public async Task WritePromptAsync()
         {
-            UpdateColours(MessageColour.Input);
+            UpdateColours(MessageColour.Text);
             if (Console.CursorLeft == 0)
             {
                 await Console.Out.WriteAsync(Prompt);
@@ -177,7 +177,7 @@ namespace UnicodeConsole.Infrastructure.Shell
                                 var commandResults = await AddCommandAsync(commandName);
                                 foreach (var result in commandResults)
                                 {
-                                    await WriteMessageAsync("Result: " + result, MessageColour.StateChangeSuccess);
+                                    await WriteMessageAsync("Result: " + result, MessageColour.OK);
                                 }
                             }
                         }

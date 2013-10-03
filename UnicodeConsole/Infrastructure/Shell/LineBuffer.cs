@@ -19,7 +19,7 @@ namespace UnicodeConsole.Infrastructure.Shell
             _scheme = scheme;
             _buffer = new StringBuilder(capacity);
             _wordBoundaries = new List<int>(5);
-            _defaultColour = new ColourPair(MessageColour.Text.ToANSIColour(), MessageColour.Background.ToANSIColour());
+            _defaultColour = new ColourPair(MessageColour.Text.ToANSIColour(_scheme), MessageColour.Background.ToANSIColour(_scheme));
         }
 
         internal void Append(char keyChar)
