@@ -66,22 +66,19 @@ namespace Win32ConEcho
             {
                 foreach (var colouredString in sentence.Atomize().ToColourizedStrings())
                 {
-                    if (colouredString.Background == colouredString.Foreground)
+                    if (colouredString.Colours.IsReset)
                     {
-                        if (colouredString.Foreground == ANSIColour.Reset)
-                        {
-                            Console.ResetColor();
-                        }
+                        Console.ResetColor();
                     }
                     else
                     {
-                        if (colouredString.Foreground >= 0)
+                        if (colouredString.Colours.Foreground >= 0)
                         {
-                            Console.ForegroundColor = (ConsoleColor)colouredString.Foreground;
+                            Console.ForegroundColor = (ConsoleColor)colouredString.Colours.Foreground;
                         }
-                        if (colouredString.Background >= 0)
+                        if (colouredString.Colours.Background >= 0)
                         {
-                            Console.BackgroundColor = (ConsoleColor)colouredString.Background;
+                            Console.BackgroundColor = (ConsoleColor)colouredString.Colours.Background;
                         }
                     }
                     await Console.Out.WriteAsync(colouredString.Text);

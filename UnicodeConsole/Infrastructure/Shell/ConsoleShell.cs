@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Win32ConEcho;
 
 namespace UnicodeConsole.Infrastructure.Shell
 {
@@ -16,20 +17,20 @@ namespace UnicodeConsole.Infrastructure.Shell
 
         private readonly PowerShell _ps;
         private readonly ConsoleCommand[] _commandTable;
-        private readonly ColorScheme _scheme;
-        private readonly StringBuilder _lineBuffer;
+        private readonly ColourScheme _scheme;
+        private readonly LineBuffer _lineBuffer;
 
-        public ConsoleShell(ColorScheme scheme = ColorScheme.TerminalBlack)
+        public ConsoleShell(ColourScheme scheme = ColourScheme.TerminalBlack)
         {
             _ps = PowerShell.Create();
-            _lineBuffer = new StringBuilder(Console.BufferWidth);
             _scheme = scheme;
+            _lineBuffer = new LineBuffer(_scheme, Console.BufferWidth);
             _commandTable = new[]
                 {
                     new ConsoleCommand("exit", "Closes the console",
                                        async args =>
                                            {
-                                               await WriteMessageAsync("Bye bye!", MessageColor.Unimportant);
+                                               await WriteMessageAsync("Bye bye!", MessageColour.Unimportant);
                                                return ConsoleDelegateResult.ExitShell;
                                            },
                                        ConsoleKey.Escape),
@@ -44,7 +45,7 @@ namespace UnicodeConsole.Infrastructure.Shell
                                                    entryAssembly.FullName, "Copyright© 2013", "Sebastian Godelet <sebastian.godelet@gmail.com>",
                                                    psHost.Members["Version"].Value
                                                );
-                                               await WriteMessageAsync(versionMessage, MessageColor.Text);
+                                               await WriteMessageAsync(versionMessage, MessageColour.Text);
                                                return ConsoleDelegateResult.Ok;
                                            },
                                        null
@@ -60,33 +61,38 @@ namespace UnicodeConsole.Infrastructure.Shell
                                                        UnhandledExceptionEventArgs unhandledExceptionEventArgs)
         {
             WriteMessageAsync(string.Format("from: {0} exeption: {1}: terminating: {2}", sender, unhandledExceptionEventArgs.ExceptionObject, unhandledExceptionEventArgs.IsTerminating),
-                MessageColor.Error).Wait(-1);
+                MessageColour.Error).Wait(-1);
         }
 
         public async Task WritePromptAsync()
         {
-            UpdateColor(MessageColor.Input);
+            UpdateColours(MessageColour.Input);
             if (Console.CursorLeft == 0)
             {
                 await Console.Out.WriteAsync(Prompt);
             }
         }
 
-        public async Task WriteMessageAsync(string message, MessageColor messageColor)
+        public async Task WriteMessageAsync(string message, MessageColour messageColor)
         {
             Console.CursorLeft = 0;
-            UpdateColor(messageColor);
+            UpdateColours(messageColor);
 
-            var outputStream = messageColor == MessageColor.Error ? Console.Error : Console.Out;
+            var outputStream = messageColor == MessageColour.Error ? Console.Error : Console.Out;
             await outputStream.WriteLineAsync(message);
             await WritePromptAsync();
             await outputStream.WriteAsync(_lineBuffer.ToString());
         }
 
-        private void UpdateColor(MessageColor messageColor)
+        private void UpdateColours(MessageColour messageColor, MessageColour backgroundColor = MessageColour.Background)
         {
-            Console.BackgroundColor = MessageColor.Background.ToConsoleColor(_scheme);
-            Console.ForegroundColor = messageColor.ToConsoleColor(_scheme);
+            UpdateColours(new ColourPair(messageColor.ToANSIColour(_scheme), backgroundColor.ToANSIColour(_scheme)));
+        }
+
+        private void UpdateColours(ColourPair colourPair)
+        {
+            Console.BackgroundColor = (ConsoleColor)colourPair.Background;
+            Console.ForegroundColor = (ConsoleColor)colourPair.Foreground;
         }
 
         public async Task<ConsoleDelegateResult> ReadConsole()
@@ -106,7 +112,7 @@ namespace UnicodeConsole.Infrastructure.Shell
                 switch (controlOrAlt)
                 {
                     case CntrlAltMask:
-                        await WriteMessageAsync(string.Format("Unhandled key: Cntrl{1}-Alt-{0}", consoleKey, isShift ? "-Shift" : ""), MessageColor.Error);
+                        await WriteMessageAsync(string.Format("Unhandled key: Cntrl{1}-Alt-{0}", consoleKey, isShift ? "-Shift" : ""), MessageColour.Error);
                         await Task.Delay(1000);
                         break;
 
@@ -123,14 +129,14 @@ namespace UnicodeConsole.Infrastructure.Shell
                                 break;
 
                             default:
-                                await WriteMessageAsync(string.Format("Unhandled key: Cntrl-{1}{0}", consoleKey, isShift ? "-Shift" : ""), MessageColor.Error);
+                                await WriteMessageAsync(string.Format("Unhandled key: Cntrl-{1}{0}", consoleKey, isShift ? "-Shift" : ""), MessageColour.Error);
                                 await Task.Delay(1000);
                                 break;
                         }
                         break;
 
                     case ConsoleModifiers.Alt:
-                        await WriteMessageAsync(string.Format("Pressed Alt-{0}", consoleKey), MessageColor.Text);
+                        await WriteMessageAsync(string.Format("Pressed Alt-{0}", consoleKey), MessageColour.Text);
                         await Task.Delay(1000);
                         break;
 
@@ -148,14 +154,12 @@ namespace UnicodeConsole.Infrastructure.Shell
             {
                 case ConsoleKey.Enter:
                     {
-                        var input = _lineBuffer.ToString();
+                        var input = _lineBuffer.RawInput();
                         _lineBuffer.Clear();
-                        Console.WriteLine();
+                        await Console.Out.WriteLineAsync();
 
                         var commandName = new Regex(@"^([^(\s]+)\b", RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant).Match(input).Groups[1].Value.Trim();
                         var args = input.Substring(commandName.Length).Trim();
-
-                        Console.ResetColor();
 
                         var applicableCommands =
                             (from commandInfo in _commandTable
@@ -173,38 +177,38 @@ namespace UnicodeConsole.Infrastructure.Shell
                                 var commandResults = await AddCommandAsync(commandName);
                                 foreach (var result in commandResults)
                                 {
-                                    await WriteMessageAsync("Result: " + result, MessageColor.StateChangeSuccess);
+                                    await WriteMessageAsync("Result: " + result, MessageColour.StateChangeSuccess);
                                 }
                             }
                         }
                         else
                         {
-                            await WriteMessageAsync("multiple matching actions for: " + commandName, MessageColor.Error);
+                            await WriteMessageAsync("multiple matching actions for: " + commandName, MessageColour.Error);
                         }
 
                         if (!commandResult.HasFlag(ConsoleDelegateResult.InhibitPrompt))
                             await WritePromptAsync();
                     }
                     break;
+
                 case ConsoleKey.Backspace:
                     if (Console.CursorLeft > Prompt.Length)
                     {
                         Console.CursorLeft--;
-                        Console.Write(' ');
+                        await Console.Out.WriteAsync(' ');
                         Console.CursorLeft--;
-                        if (_lineBuffer.Length > 0)
-                            _lineBuffer.Remove(_lineBuffer.Length - 1, 1);
+                        _lineBuffer.RemoveEndChars();
                     }
                     break;
                 default:
                     if (!char.IsControl(keyChar))
                     {
                         _lineBuffer.Append(keyChar);
-                        if (Console.CursorLeft == 0)
-                            await WritePromptAsync();
-
-                        UpdateColor(MessageColor.Input);
-                        await Console.Out.WriteAsync(keyChar);
+                        string lastWord;
+                        UpdateColours(_lineBuffer.LastWordColours(out lastWord));
+                        // -1 because the currently typed char has not been written yet
+                        Console.CursorLeft -= (lastWord.Length - 1); 
+                        await Console.Out.WriteAsync(lastWord);
                     }
                     break;
             }
@@ -221,7 +225,7 @@ namespace UnicodeConsole.Infrastructure.Shell
         {
             foreach (var command in _commandTable)
             {
-                await WriteMessageAsync(command.ToString(), MessageColor.Text);
+                await WriteMessageAsync(command.ToString(), MessageColour.Text);
             }
 
             return ConsoleDelegateResult.Ok;

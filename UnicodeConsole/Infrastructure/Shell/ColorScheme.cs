@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Win32ConEcho;
 
 namespace UnicodeConsole.Infrastructure.Shell
 {
-    public enum ColorScheme
+    public enum ColourScheme
     {
         TerminalBlack
     }
 
-    public enum MessageColor
+    public enum MessageColour
     {
         Background,
         Unimportant,
@@ -26,32 +27,31 @@ namespace UnicodeConsole.Infrastructure.Shell
 
     public static class MessageColorEx
     {
-        public static ConsoleColor ToConsoleColor(this MessageColor @this,
-                                                  ColorScheme scheme = ColorScheme.TerminalBlack)
+        public static ANSIColour ToANSIColour(this MessageColour @this, ColourScheme scheme = ColourScheme.TerminalBlack)
         {
             switch (scheme)
             {
-                case ColorScheme.TerminalBlack:
+                case ColourScheme.TerminalBlack:
                     switch (@this)
                     {
-                        case MessageColor.StateLog:
-                            return ConsoleColor.Cyan;
-                        case MessageColor.Background:
-                            return ConsoleColor.Black;
-                        case MessageColor.Error:
-                            return ConsoleColor.Red;
-                        case MessageColor.RecoverableFailure:
-                            return ConsoleColor.DarkRed;
-                        case MessageColor.Text:
-                            return ConsoleColor.White;
-                        case MessageColor.StateChangeSuccess:
-                            return ConsoleColor.Green;
-                        case MessageColor.Unimportant:
-                            return ConsoleColor.DarkGray;
-                        case MessageColor.Impure:
-                            return ConsoleColor.Magenta;
-                        case MessageColor.Input:
-                            return ConsoleColor.White;
+                        case MessageColour.StateLog:
+                            return ANSIColour.Cyan;
+                        case MessageColour.Background:
+                            return ANSIColour.Black;
+                        case MessageColour.Error:
+                            return ANSIColour.Red;
+                        case MessageColour.RecoverableFailure:
+                            return ANSIColour.DarkRed;
+                        case MessageColour.Text:
+                            return ANSIColour.White;
+                        case MessageColour.StateChangeSuccess:
+                            return ANSIColour.Green;
+                        case MessageColour.Unimportant:
+                            return ANSIColour.DarkGray;
+                        case MessageColour.Impure:
+                            return ANSIColour.Magenta;
+                        case MessageColour.Input:
+                            return ANSIColour.White;
 
                         default:
                             throw new ArgumentException("No mapping for: " + @this + " in the scheme: " + scheme, "this");

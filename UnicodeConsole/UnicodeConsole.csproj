@@ -75,6 +75,7 @@
     <Compile Include="Infrastructure\Shell\ConsoleHelper.cs" />
     <Compile Include="Infrastructure\Shell\ConsoleHotkey.cs" />
     <Compile Include="Infrastructure\Shell\ConsoleShell.cs" />
+    <Compile Include="Infrastructure\Shell\LineBuffer.cs" />
     <Compile Include="Infrastructure\TextHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WinAPI\UnsafeNativeFunctions.cs" />

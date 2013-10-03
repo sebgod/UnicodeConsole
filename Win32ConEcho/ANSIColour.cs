@@ -25,6 +25,34 @@ namespace Win32ConEcho
         White = ConsoleColor.White // 15
     }
 
+    public struct ColourPair
+    {
+        public readonly ANSIColour Foreground;
+        public readonly ANSIColour Background;
+
+        public ColourPair(ANSIColour foreground, ANSIColour background)
+        {
+            Foreground = foreground;
+            Background = background;
+        }
+
+        public bool AreValid
+        {
+            get
+            {
+                return Foreground != Background || Foreground < 0;
+            }
+        }
+
+        public bool IsReset
+        {
+            get
+            {
+                return Foreground == Background && Foreground == ANSIColour.Reset;
+            }
+        }
+    }
+
     public enum ANSIColourDirective : byte
     {
         NoModifiers = 0,

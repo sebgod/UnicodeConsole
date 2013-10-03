@@ -8,17 +8,15 @@ namespace Win32ConEcho
 {
     public struct ColouredString
     {
-        public readonly ANSIColour Foreground;
-        public readonly ANSIColour Background;
+        public readonly ColourPair Colours;
         public readonly string Text;
 
-        public ColouredString(string text, ANSIColour foreground = ANSIColour.Unchanged, ANSIColour background = ANSIColour.Unchanged)
+        public ColouredString(string text, ColourPair colours)
         {
-            if (foreground == background && foreground >= 0)
-                throw new ArgumentException("Cannot set console foreground and background to the same colour (" + background + ")!", "background");
+            if (!colours.AreValid)
+                throw new ArgumentException("Cannot set console foreground and background to the same colour (" + colours.Background + ")!", "colours");
 
-            Foreground = foreground;
-            Background = background;
+            Colours = colours;
             Text = text;
         }
     }
@@ -35,7 +33,7 @@ namespace Win32ConEcho
                 switch (atom.AtomType)
                 {
                     case AtomType.Text:
-                        yield return new ColouredString(atom.Text, foreground, background);
+                        yield return new ColouredString(atom.Text, new ColourPair(foreground, background));
                         break;
 
                     case AtomType.ColorEscape:
