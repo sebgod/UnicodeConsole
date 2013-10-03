@@ -11,15 +11,13 @@ namespace UnicodeConsole.Infrastructure.Shell
     {
         private readonly StringBuilder _buffer;
         private readonly List<int> _wordBoundaries;
-        private ColourScheme _scheme;
         private readonly ColourPair _defaultColour;
 
-        public LineBuffer(ColourScheme scheme, int capacity)
+        public LineBuffer(int capacity)
         {
-            _scheme = scheme;
             _buffer = new StringBuilder(capacity);
             _wordBoundaries = new List<int>(5);
-            _defaultColour = new ColourPair(MessageColour.Text.ToANSIColour(_scheme), MessageColour.Background.ToANSIColour(_scheme));
+            _defaultColour = new ColourPair(MessageColour.Text.ToANSIColour(), MessageColour.Background.ToANSIColour());
         }
 
         internal void Append(char keyChar)

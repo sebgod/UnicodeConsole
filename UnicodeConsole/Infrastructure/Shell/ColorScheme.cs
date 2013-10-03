@@ -7,12 +7,6 @@ using Win32ConEcho;
 
 namespace UnicodeConsole.Infrastructure.Shell
 {
-    public enum ColourScheme
-    {
-        WhiteOnBlack,
-        BlackOnWhite
-    }
-
     public enum MessageColour
     {
         Background,
@@ -25,48 +19,23 @@ namespace UnicodeConsole.Infrastructure.Shell
 
     public static class MessageColorEx
     {
-        public static ANSIColour ToANSIColour(this MessageColour @this, ColourScheme scheme)
+        public static ANSIColour ToANSIColour(this MessageColour @this)
         {
-            switch (scheme)
+            switch (@this)
             {
-                case ColourScheme.WhiteOnBlack:
-                    switch (@this)
-                    {
-                        case MessageColour.Background:
-                            return ANSIColour.Black;
-                        case MessageColour.Text:
-                            return ANSIColour.White;
-                        case MessageColour.Error:
-                            return ANSIColour.Red;
-                        case MessageColour.Warning:
-                            return ANSIColour.Yellow;
-                        case MessageColour.OK:
-                            return ANSIColour.Green;
-
-                        default:
-                            throw new ArgumentException("No mapping for: " + @this + " in the scheme: " + scheme, "this");
-                    }
-
-                case ColourScheme.BlackOnWhite:
-                    switch (@this)
-                    {
-                        case MessageColour.Background:
-                            return ANSIColour.White;
-                        case MessageColour.Text:
-                            return ANSIColour.Black;
-                        case MessageColour.Error:
-                            return ANSIColour.Red;
-                        case MessageColour.Warning:
-                            return ANSIColour.Yellow;
-                        case MessageColour.OK:
-                            return ANSIColour.Green;
-
-                        default:
-                            throw new ArgumentException("No mapping for: " + @this + " in the scheme: " + scheme, "this");
-                    }
+                case MessageColour.Background:
+                    return ANSIColour.Black;
+                case MessageColour.Text:
+                    return ANSIColour.White;
+                case MessageColour.Error:
+                    return ANSIColour.Red;
+                case MessageColour.Warning:
+                    return ANSIColour.Yellow;
+                case MessageColour.OK:
+                    return ANSIColour.Green;
 
                 default:
-                    throw new ArgumentException("Color scheme: " + scheme + " is not implemented!", "scheme");
+                    throw new ArgumentException("No mapping for: " + @this, "this");
             }
         }
     }

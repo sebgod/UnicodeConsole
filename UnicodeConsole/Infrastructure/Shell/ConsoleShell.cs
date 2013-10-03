@@ -17,14 +17,12 @@ namespace UnicodeConsole.Infrastructure.Shell
 
         private readonly PowerShell _ps;
         private readonly ConsoleCommand[] _commandTable;
-        private readonly ColourScheme _scheme;
         private readonly LineBuffer _lineBuffer;
 
-        public ConsoleShell(ColourScheme scheme = ColourScheme.WhiteOnBlack)
+        public ConsoleShell()
         {
             _ps = PowerShell.Create();
-            _scheme = scheme;
-            _lineBuffer = new LineBuffer(_scheme, Console.BufferWidth);
+            _lineBuffer = new LineBuffer(Console.BufferWidth);
             _commandTable = new[]
                 {
                     new ConsoleCommand("exit", "Closes the console",
@@ -86,7 +84,7 @@ namespace UnicodeConsole.Infrastructure.Shell
 
         private void UpdateColours(MessageColour messageColor, MessageColour backgroundColor = MessageColour.Background)
         {
-            UpdateColours(new ColourPair(messageColor.ToANSIColour(_scheme), backgroundColor.ToANSIColour(_scheme)));
+            UpdateColours(new ColourPair(messageColor.ToANSIColour(), backgroundColor.ToANSIColour()));
         }
 
         private void UpdateColours(ColourPair colourPair)
