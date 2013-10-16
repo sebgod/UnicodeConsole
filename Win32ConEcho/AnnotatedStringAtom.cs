@@ -29,6 +29,12 @@ namespace Win32ConEcho
 
                 switch (c)
                 {
+                    // matching the literal ASCII control chars to their escaped versions
+                    case '\a':
+                    case '\x1B':
+                        cursor--;
+                        goto case '\\';
+
                     case '\\':
                         if (cursor == length)
                             throw new ArgumentException(input + " has an invalid escape sequence at=" + cursor, "input");
@@ -44,14 +50,33 @@ namespace Win32ConEcho
                             case 'n':
                                 buffer.Append('\n');
                                 break;
+                            
+                            case 'u':
+                                var unicodeEscapeLength = input.UnicodeCodePointEscapeLength(cursor);
+                                buffer.Append(char.ConvertFromUtf32((int)Convert.ToUInt32(input.Substring(cursor, unicodeEscapeLength), 16)));
+                                break;
+                            
+                            case '\a':
+                                if (next == c)
+                                    goto case 'a';
+                                goto default;
+
+                            case 'a':
+                                yield return buffer.FlushBuffer(annotation);
+                                yield return new AnnotatedStringAtom(AtomType.ControlChar, Convert.ToString(next));
+                                break;
 
                             case 't':
                                 buffer.Append('\t');
                                 break;
 
+                            case '\x1B':
+                                if (next == c)
+                                    goto case 'e';
+                                goto default;
+
                             case 'e':
-                                yield return new AnnotatedStringAtom(annotation, buffer.ToString());
-                                buffer.Clear();
+                                yield return buffer.FlushBuffer(annotation);
 
                                 var seqEndIndex = input.IndexOfAny(new[] { (char)AtomType.ColorEscape, '_', ' ' }, cursor);
 
@@ -97,6 +122,64 @@ namespace Win32ConEcho
             }
 
             yield return new AnnotatedStringAtom(annotation, buffer.ToString());
+        }
+
+        private static int UnicodeCodePointEscapeLength(this string @this, int offset)
+        {
+            var unicodeEscapeLength = 4;
+            if (@this.Length >= offset + 8 && @this[offset] == '0' && @this[offset + 1] == '0')
+            {
+                unicodeEscapeLength = 8;
+                for (var i = offset + 4; i < offset + 8; i++)
+                {
+                    if (!@this.IsHexDigit(i))
+                    {
+                        unicodeEscapeLength = 4;
+                        break;
+                    }
+                }
+            }
+            return unicodeEscapeLength;
+        }
+
+        private static bool IsHexDigit(this string @this, int index)
+        {
+            switch (@this[index])
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                case 'A':
+                case 'B':
+                case 'C':
+                case 'D':
+                case 'E':
+                case 'F':
+                case 'a':
+                case 'b':
+                case 'c':
+                case 'd':
+                case 'e':
+                case 'f':
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        private static AnnotatedStringAtom FlushBuffer(this StringBuilder buffer, AtomType annotation)
+        {
+            var stringified = buffer.ToString();
+            buffer.Clear();
+            return new AnnotatedStringAtom(annotation, stringified);
         }
 
         private static AtomType ParseANSIEscapeSequenceMarker(char seqEnd)

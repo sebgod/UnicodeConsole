@@ -1,8 +1,9 @@
 ﻿namespace Win32ConEcho
 {
-    public enum AtomType
+    public enum AtomType : ushort
     {
         Text = 0,
-        ColorEscape = 'm'
+        ColorEscape = 'm',
+        ControlChar = 'C'
     }
 }
