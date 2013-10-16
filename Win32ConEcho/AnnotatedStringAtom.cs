@@ -54,6 +54,7 @@ namespace Win32ConEcho
                             case 'u':
                                 var unicodeEscapeLength = input.UnicodeCodePointEscapeLength(cursor);
                                 buffer.Append(char.ConvertFromUtf32((int)Convert.ToUInt32(input.Substring(cursor, unicodeEscapeLength), 16)));
+                                cursor += unicodeEscapeLength;
                                 break;
                             
                             case '\a':
@@ -130,7 +131,7 @@ namespace Win32ConEcho
             if (@this.Length >= offset + 8 && @this[offset] == '0' && @this[offset + 1] == '0')
             {
                 unicodeEscapeLength = 8;
-                for (var i = offset + 4; i < offset + 8; i++)
+                for (var i = offset + 2; i < offset + 8; i++)
                 {
                     if (!@this.IsHexDigit(i))
                     {
