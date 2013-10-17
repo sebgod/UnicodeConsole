@@ -57,6 +57,7 @@ namespace Win32ConEcho
     {
         NoModifiers = 0,
         BrightColours = 1,
+        Inverse = 3,
     }
 
     public static class ANSIColourEx

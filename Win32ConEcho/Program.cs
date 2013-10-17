@@ -66,22 +66,39 @@ namespace Win32ConEcho
             {
                 foreach (var colouredString in sentence.Atomize().ToColourizedStrings())
                 {
-                    if (colouredString.Colours.IsReset)
+                    if (colouredString.ControlChar > '\0')
                     {
-                        Console.ResetColor();
+                        switch (colouredString.ControlChar)
+                        {
+                            case '\a':
+                                int beepFreq;
+                                int beepDuration;
+                                if (TryParseBellParams(colouredString.Text, out beepFreq, out beepDuration))
+                                    Console.Beep(beepFreq, beepDuration);
+                                else
+                                    Console.Beep();
+                                break;
+                        }
                     }
                     else
                     {
-                        if (colouredString.Colours.Foreground >= 0)
+                        if (colouredString.Colours.IsReset)
                         {
-                            Console.ForegroundColor = (ConsoleColor)colouredString.Colours.Foreground;
+                            Console.ResetColor();
                         }
-                        if (colouredString.Colours.Background >= 0)
+                        else
                         {
-                            Console.BackgroundColor = (ConsoleColor)colouredString.Colours.Background;
+                            if (colouredString.Colours.Foreground >= 0)
+                            {
+                                Console.ForegroundColor = (ConsoleColor)colouredString.Colours.Foreground;
+                            }
+                            if (colouredString.Colours.Background >= 0)
+                            {
+                                Console.BackgroundColor = (ConsoleColor)colouredString.Colours.Background;
+                            }
                         }
+                        await Console.Out.WriteAsync(colouredString.Text);
                     }
-                    await Console.Out.WriteAsync(colouredString.Text);
                 }
             }
             else
@@ -91,6 +108,17 @@ namespace Win32ConEcho
 
             if (commandSwitches.HasFlag(CommandSwitch.NewLine))
                 await Console.Out.WriteLineAsync();
+        }
+
+        private static bool TryParseBellParams(string text, out int beepFreq, out int beepDuration)
+        {
+            beepFreq = 0;
+            beepDuration = 0;
+            if (string.IsNullOrEmpty(text))
+                return false;
+
+            var beepParams = text.Split(new[] { ';' });
+            return beepParams.Length == 2 && int.TryParse(beepParams[0], out beepFreq) && int.TryParse(beepParams[1], out beepDuration);
         }
     }
 }

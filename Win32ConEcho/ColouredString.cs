@@ -9,14 +9,16 @@ namespace Win32ConEcho
     public struct ColouredString
     {
         public readonly ColourPair Colours;
+        public readonly char ControlChar;
         public readonly string Text;
 
-        public ColouredString(string text, ColourPair colours)
+        public ColouredString(string text, char controlChar, ColourPair colours)
         {
             if (!colours.AreValid)
                 throw new ArgumentException("Cannot set console foreground and background to the same colour (" + colours.Background + ")!", "colours");
 
             Colours = colours;
+            ControlChar = controlChar;
             Text = text;
         }
     }
@@ -33,7 +35,11 @@ namespace Win32ConEcho
                 switch (atom.AtomType)
                 {
                     case AtomType.Text:
-                        yield return new ColouredString(atom.Text, new ColourPair(foreground, background));
+                        yield return new ColouredString(atom.Text, '\0', new ColourPair(foreground, background));
+                        break;
+
+                    case AtomType.ControlChar:
+                        yield return new ColouredString(null, atom.Text[0], new ColourPair(foreground, background));
                         break;
 
                     case AtomType.ColorEscape:
@@ -57,6 +63,12 @@ namespace Win32ConEcho
                                         case ANSIColourDirective.NoModifiers:
                                             foreground = ANSIColour.Reset;
                                             background = ANSIColour.Reset;
+                                            break;
+
+                                        case ANSIColourDirective.Inverse:
+                                            var temp = foreground;
+                                            foreground = background;
+                                            background = temp;
                                             break;
                                     }
                                     break;
