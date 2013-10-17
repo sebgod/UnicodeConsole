@@ -66,9 +66,8 @@ namespace Win32ConEcho
                                             break;
 
                                         case ANSIColourDirective.Inverse:
-                                            var temp = foreground;
-                                            foreground = background;
-                                            background = temp;
+                                            foreground = ANSIColour.Swap;
+                                            background = ANSIColour.Swap;
                                             break;
                                     }
                                     break;

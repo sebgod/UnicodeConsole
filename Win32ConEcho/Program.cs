@@ -70,13 +70,8 @@ namespace Win32ConEcho
                     {
                         switch (colouredString.ControlChar)
                         {
-                            case '\a':
-                                int beepFreq;
-                                int beepDuration;
-                                if (TryParseBellParams(colouredString.Text, out beepFreq, out beepDuration))
-                                    Console.Beep(beepFreq, beepDuration);
-                                else
-                                    Console.Beep();
+                            case 'a':
+                                ControlCharHelper.DoBeep(colouredString);
                                 break;
                         }
                     }
@@ -85,6 +80,12 @@ namespace Win32ConEcho
                         if (colouredString.Colours.IsReset)
                         {
                             Console.ResetColor();
+                        }
+                        else if (colouredString.Colours.IsSwap)
+                        {
+                            var temp = Console.ForegroundColor;
+                            Console.ForegroundColor = Console.BackgroundColor;
+                            Console.BackgroundColor = temp;
                         }
                         else
                         {
@@ -110,15 +111,5 @@ namespace Win32ConEcho
                 await Console.Out.WriteLineAsync();
         }
 
-        private static bool TryParseBellParams(string text, out int beepFreq, out int beepDuration)
-        {
-            beepFreq = 0;
-            beepDuration = 0;
-            if (string.IsNullOrEmpty(text))
-                return false;
-
-            var beepParams = text.Split(new[] { ';' });
-            return beepParams.Length == 2 && int.TryParse(beepParams[0], out beepFreq) && int.TryParse(beepParams[1], out beepDuration);
-        }
     }
 }

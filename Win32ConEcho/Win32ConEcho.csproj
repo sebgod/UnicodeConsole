@@ -63,6 +63,7 @@
     <Compile Include="AnnotatedStringAtom.cs" />
     <Compile Include="AtomType.cs" />
     <Compile Include="ANSIColour.cs" />
+    <Compile Include="ControlCharHelper.cs" />
     <Compile Include="CommandSwitch.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

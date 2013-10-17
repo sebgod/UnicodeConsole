@@ -5,6 +5,7 @@ namespace Win32ConEcho
 {
     public enum ANSIColour : sbyte
     {
+        Swap  = -3,
         Reset = -2,
         Unchanged = -1,
         Black = ConsoleColor.Black, // = 0
@@ -49,6 +50,14 @@ namespace Win32ConEcho
             get
             {
                 return Foreground == Background && Foreground == ANSIColour.Reset;
+            }
+        }
+
+        public bool IsSwap
+        {
+            get
+            {
+                return Foreground == Background && Foreground == ANSIColour.Swap;
             }
         }
     }
