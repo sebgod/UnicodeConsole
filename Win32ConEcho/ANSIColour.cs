@@ -81,7 +81,8 @@ namespace Win32ConEcho
                 ANSIColour.Magenta,
                 ANSIColour.Cyan,
                 ANSIColour.White,
-                ANSIColour.Gray
+                ANSIColour.Gray,
+                ANSIColour.Reset
             };
 
         private static readonly ANSIColour[] ANSIDarkColors = new[]
@@ -94,7 +95,8 @@ namespace Win32ConEcho
                 ANSIColour.DarkMagenta,
                 ANSIColour.DarkCyan,
                 ANSIColour.White,
-                ANSIColour.DarkGray
+                ANSIColour.DarkGray,
+                ANSIColour.Reset
             };
 
         private static readonly Dictionary<string, ANSIColour> CodeColorMapping = new Dictionary<string, ANSIColour>
@@ -108,13 +110,13 @@ namespace Win32ConEcho
                 {"c", ANSIColour.Cyan},
                 {"w", ANSIColour.White},
                 {"G", ANSIColour.Gray},
-                {"dr", ANSIColour.DarkRed},
-                {"dg", ANSIColour.DarkGreen},
-                {"dy", ANSIColour.DarkYellow},
-                {"db", ANSIColour.DarkBlue},
-                {"dM", ANSIColour.DarkMagenta},
-                {"dc", ANSIColour.DarkCyan},
-                {"dG", ANSIColour.DarkGray},
+                {"+r", ANSIColour.DarkRed},
+                {"+g", ANSIColour.DarkGreen},
+                {"+y", ANSIColour.DarkYellow},
+                {"+b", ANSIColour.DarkBlue},
+                {"+M", ANSIColour.DarkMagenta},
+                {"+c", ANSIColour.DarkCyan},
+                {"+G", ANSIColour.DarkGray},
             };
 
         public static ANSIColour ParseANSIColour(string colorName)
