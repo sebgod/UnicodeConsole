@@ -9,5 +9,6 @@ namespace Win32ConEcho
         ExtendedSyntax = 1,
         NewLine = 2,
         Tab = 4,
+        OnlyEscape = 5,
     }
 }

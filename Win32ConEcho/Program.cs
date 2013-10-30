@@ -47,6 +47,14 @@ namespace Win32ConEcho
 
                     case "-x":
                         switches |= CommandSwitch.ExtendedSyntax;
+                        if (switches.HasFlag(CommandSwitch.OnlyEscape))
+                            throw new ArgumentException("Conflict: " + CommandSwitch.ExtendedSyntax + " already " + CommandSwitch.OnlyEscape + " set!", "args");
+                        break;
+
+                    case "-e":
+                        switches |= CommandSwitch.OnlyEscape;
+                        if (switches.HasFlag(CommandSwitch.ExtendedSyntax))
+                            throw new ArgumentException("Conflict: " + CommandSwitch.OnlyEscape + " already " + CommandSwitch.ExtendedSyntax + " set!", "args");
                         break;
 
                     default:
@@ -101,6 +109,38 @@ namespace Win32ConEcho
                         await Console.Out.WriteAsync(colouredString.Text);
                     }
                 }
+            }
+            else if (commandSwitches.HasFlag(CommandSwitch.OnlyEscape))
+            {
+                var inputLength = sentence.Length;
+                var replacedChars = new StringBuilder(inputLength);
+                for (var i = 0; i < inputLength; i++)
+                {
+                    var @char = sentence[i];
+                    switch (@char)
+                    {
+                        case '\\':
+                            char composed;
+                            switch (sentence[i++])
+                            {
+                                case 'a': composed = '\a'; break;
+                                case 'b': composed = '\b'; break;
+                                case 'e': composed = '\x1b'; break;
+                                case 'f': composed = '\f'; break;
+                                case 'n': composed = '\n'; break;
+                                case 'v': composed = '\v'; break;
+                                default:
+                                    throw new ArgumentException(@"Escape sequence \" + sentence[i] + " is not supported!", "sentence");
+                            }
+                            replacedChars.Append(composed);
+                            break;
+
+                        default:
+                            replacedChars.Append(@char);
+                            break;
+                    }
+                }
+                await Console.Out.WriteAsync(replacedChars.ToString());
             }
             else
             {
