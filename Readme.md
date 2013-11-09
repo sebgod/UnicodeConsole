@@ -1,4 +1,1 @@
-﻿Unicode Console
-===============
-
-A portable unicode aware console as a replacement for cmd.exe.
+﻿Unicode Console===============A portable Unicode aware console as a replacement for cmd.exe.
