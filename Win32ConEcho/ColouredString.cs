@@ -23,19 +23,27 @@ namespace Win32ConEcho
         }
     }
 
+    public enum UnderlineType
+    {
+        None = 0,
+        Single = 1,
+        Double = 2,
+    }
+
     public static class ColouredStringEx {
         // AnnotatedString.AnnotateText(sentence)
         public static IEnumerable<ColouredString> ToColourizedStrings(this IEnumerable<AnnotatedStringAtom> atoms)
         {
             var foreground = ANSIColour.Unchanged;
             var background = ANSIColour.Unchanged;
+            var underline = UnderlineType.None;
 
             foreach (var atom in atoms)
             {
                 switch (atom.AtomType)
                 {
                     case AtomType.Text:
-                        yield return new ColouredString(atom.Text, '\0', new ColourPair(foreground, background));
+                        yield return new ColouredString(ApplyUnderline(atom.Text, underline), '\0', new ColourPair(foreground, background));
                         break;
 
                     case AtomType.ControlChar:
@@ -44,7 +52,7 @@ namespace Win32ConEcho
 
                     case AtomType.ColorEscape:
                         var switches = string.IsNullOrEmpty(atom.Text) ? new[] { "0" } : atom.Text.Split(';');
-                        var usesText = switches.Length >= 1 && char.IsLetter(switches[0], 0);
+                        var usesText = switches.Length >= 1 && ( char.IsLetter(switches[0], 0) || switches[0][0] == '+' );
                         if (usesText)
                         {
                             foreground = ANSIColourEx.ParseANSIColour(switches[0]);
@@ -63,11 +71,16 @@ namespace Win32ConEcho
                                         case ANSIColourDirective.NoModifiers:
                                             foreground = ANSIColour.Reset;
                                             background = ANSIColour.Reset;
+                                            underline = UnderlineType.None;
                                             break;
 
                                         case ANSIColourDirective.Inverse:
                                             foreground = ANSIColour.Swap;
                                             background = ANSIColour.Swap;
+                                            break;
+
+                                        case ANSIColourDirective.UnderlineSingle:
+                                            underline = UnderlineType.Single;
                                             break;
                                     }
                                     break;
@@ -83,6 +96,42 @@ namespace Win32ConEcho
                         }
                         break;
                 }
+            }
+        }
+
+        private static string ApplyUnderline(string text, UnderlineType underline)
+        {
+            switch (underline)
+            {
+                case UnderlineType.None:
+                    return text;
+
+                case UnderlineType.Single:
+                    var length = text.Length;
+                    var underlined = new StringBuilder(length * 2 + 2);
+                    for (var i = 0; i < length; i++)
+                    {
+                        var c = text[i];
+                        underlined.Append(c);
+                        if (char.IsSurrogate(c))
+                        {
+                            underlined.Append(text[i + 1]);
+                            if (char.IsLetterOrDigit(text, i))
+                            {
+                                underlined.Append('\u0332');
+                            }
+                            i++;
+                        }
+                        else if (char.IsLetterOrDigit(c))
+                        {
+                            underlined.Append('\u0332');
+                        }
+                    }
+                    return underlined.ToString();
+
+                case UnderlineType.Double:
+                default:
+                    throw new ArgumentException(string.Format("UnderlineType \"{0}\" is not supported!", underline), "underline");
             }
         }
     }
