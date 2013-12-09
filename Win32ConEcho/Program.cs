@@ -121,7 +121,7 @@ namespace Win32ConEcho
                     {
                         case '\\':
                             char composed;
-                            switch (sentence[i++])
+                            switch (sentence[++i])
                             {
                                 case 'a': composed = '\a'; break;
                                 case 'b': composed = '\b'; break;
