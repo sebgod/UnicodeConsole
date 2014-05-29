@@ -14,3 +14,4 @@
 @%xecho% -x -n "Test beep: \a"
 @%xecho% -x -n "Test \e3_inverse colours\e_"
 @%xecho% -x -n "Test \e4_underlined text\e_"
+@%xecho% -x -n "Test \e1_bold text\e_"
