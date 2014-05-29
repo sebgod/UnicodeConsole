@@ -1,5 +1,5 @@
 @echo Deploying xecho.exe targets
-@if "%~1" == "" (
+@if "%~1" == "" @(
     @echo You must specify the deploy directory >&2
     @exit /b 1
 )
@@ -11,7 +11,8 @@
 @echo pushd outdir=%outdir%
 @pushd %outdir%
 
-@for %%F in (xecho.exe) do (
+@for %%F in (xecho.exe) do @(
+    @echo xcopy /i /y %%F "%~1"
     xcopy /i /y %%F "%~1"
     @echo popping to deploy directory "%~1"
     @pushd "%~1"
